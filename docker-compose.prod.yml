@@ -1,0 +1,169 @@
+# Production Docker Compose Configuration
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    ports:
+      - "5000:5000"
+    environment:
+      # Production Critical Variables
+      - NODE_ENV=production
+      - PORT=5000
+      
+      # Frontend URL (MUST be configured for CORS)
+      - FRONTEND_URL=${FRONTEND_URL:-https://yourdomain.com}
+      
+      # Email Configuration (Use environment secrets instead)
+      - EMAIL_SERVICE=${EMAIL_SERVICE:-gmail}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - EMAIL_TO=${EMAIL_TO}
+      
+      # API Configuration
+      - API_TIMEOUT=30000
+      - MAX_REQUEST_SIZE=10mb
+      
+      # Validation Limits
+      - MAX_NAME_LENGTH=100
+      - MAX_EMAIL_LENGTH=254
+      - MAX_SUBJECT_LENGTH=200
+      - MAX_MESSAGE_LENGTH=5000
+      
+      # Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
+      - RATE_LIMIT_MAX_REQUESTS=5     # 5 requests per window
+      
+      # Logging
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+    
+    # NO VOLUMES in production (no hot-reload)
+    # volumes:
+    #   - ./backend/src:/app/backend/src  # ❌ REMOVED
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - portfolio-network
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=portfolio-backend"
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf.prod:/etc/nginx/conf.d/default.conf:ro
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    networks:
+      - portfolio-network
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=portfolio-frontend"
+
+networks:
+  portfolio-network:
+    driver: bridge
+
+# Volume pour persistent data (optionnel si DB ajoutée)
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ⚠️ PRODUCTION NOTES:
+# 1. Set environment variables via Docker secret or environment file:
+#    docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# 2. Use a .env.production file with sensitive data:
+#    EMAIL_USER=your-email@gmail.com
+#    EMAIL_PASSWORD=your-app-password
+#    FRONTEND_URL=https://yourdomain.com
+#
+# 3. Never commit .env.production to git!
+#    Add to .gitignore: .env.production
+#
+# 4. Use Docker secrets for maximum security (Kubernetes/Swarm):
+#    docker secret create email_password -
+#    EMAIL_PASSWORD: /run/secrets/email_password
+#
+# 5. Use reverse proxy (Nginx, Traefik) for:
+#    - HTTPS termination (SSL/TLS)
+#    - Rate limiting
+#    - Load balancing multiple instances
+#
+# 6. For scaling to multiple replicas:
+#    docker-compose -f docker-compose.prod.yml up --scale backend=3
+#    (Requires load balancer in front)
+#
+# 7. Monitoring & Logging:
+#    docker-compose -f docker-compose.prod.yml logs -f
+#    # Or use centralized logging (ELK, Datadog, etc.)
+#
+# 8. Backup strategy:
+#    docker-compose -f docker-compose.prod.yml exec backend npm run backup
+#    (Implement backup script in package.json)

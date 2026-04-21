@@ -1,0 +1,29 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio personnel - Full Stack Node.js",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "start": "cd backend && npm start",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "install-all": "cd backend && npm install && cd ../frontend && npm install",
+    "docker-up": "docker-compose up",
+    "docker-down": "docker-compose down",
+    "deploy": "bash deploy.sh"
+  },
+  "keywords": [
+    "portfolio",
+    "nodejs",
+    "fullstack"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  },
+  "dependencies": {
+    "node": "^25.9.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "portfolio-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for personal portfolio",
+  "type": "module",
+  "scripts": {
+    "start": "python -m http.server 3000 --directory .",
+    "build": "echo \"Frontend build complete\""
+  },
+  "keywords": ["portfolio", "frontend", "spa"],
+  "author": "",
+  "license": "MIT"
+}

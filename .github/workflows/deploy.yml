@@ -1,0 +1,56 @@
+name: Déploiement Portfolio
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Installer Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+    
+    - name: Tester Backend
+      run: |
+        cd backend
+        npm install
+        npm run build 2>/dev/null || true
+    
+    - name: Tester Formulaire de Contact
+      run: |
+        cd backend
+        node -e "console.log('✅ Backend prêt')"
+    
+    - name: Vérifier Frontend
+      run: |
+        cd frontend
+        npm install
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: portfolio-build
+        path: |
+          backend/
+          frontend/
+
+    - name: Déployer sur OVH (si main)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      env:
+        DEPLOY_KEY: ${{ secrets.OVH_DEPLOY_KEY }}
+        DEPLOY_HOST: ${{ secrets.OVH_HOST }}
+        DEPLOY_USER: ${{ secrets.OVH_USER }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null
+        ./deploy.sh

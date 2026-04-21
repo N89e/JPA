@@ -1,0 +1,229 @@
+# Production Nginx Configuration for Portfolio
+# Features: HTTPS support, gzip compression, security headers, SPA routing
+
+# Upstream backend service
+upstream backend {
+    server backend:5000;
+    keepalive 32;
+}
+
+# Rate limiting zones
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=general_limit:10m rate=30r/s;
+
+server {
+    listen 80;
+    server_name _;
+    
+    # Redirect all HTTP to HTTPS (in production with SSL)
+    # Uncomment when SSL is configured:
+    # return 301 https://$host$request_uri;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # ================== SPA ROUTING ==================
+    # Serve index.html for all non-file routes
+    location / {
+        try_files $uri $uri/ /index.html;
+        
+        # SPA cache policy (no-cache to check for updates)
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        expires 0;
+    }
+
+    # ================== API PROXY ==================
+    location /api/ {
+        # Rate limiting for API (5 requests per minute)
+        limit_req zone=api_limit burst=10 nodelay;
+        
+        # Proxy configuration
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        
+        # Headers for backend communication
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $server_name;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Buffering
+        proxy_buffering on;
+        proxy_buffer_size 4k;
+        proxy_buffers 8 4k;
+        proxy_busy_buffers_size 8k;
+        
+        # Cache bypass
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # ================== STATIC ASSETS ==================
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ {
+        # Long cache for static assets (1 year)
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        
+        # Enable gzip for text assets
+        gzip on;
+        gzip_types text/plain text/css application/javascript;
+        
+        # Add rate limiting for large downloads
+        limit_req zone=general_limit burst=50 nodelay;
+    }
+
+    # ================== SECURITY HEADERS ==================
+    # Prevent clickjacking
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    
+    # Enable XSS protection
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    # Prevent MIME type sniffing
+    add_header X-Content-Type-Options "nosniff" always;
+    
+    # Referrer Policy (privacy)
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Content Security Policy (prevent XSS/injection)
+    # Adjust if you need external scripts
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.*;" always;
+    
+    # Feature Policy (control browser features)
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
+    # ================== GZIP COMPRESSION ==================
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1000;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml text/javascript 
+               application/x-javascript application/xml+rss 
+               application/javascript application/json;
+    gzip_disable "msie6";
+    gzip_comp_level 6;
+
+    # ================== LOGGING ==================
+    access_log /var/log/nginx/access.log combined;
+    error_log /var/log/nginx/error.log warn;
+
+    # ================== ERROR HANDLING ==================
+    error_page 404 /index.html;
+    error_page 500 502 503 504 /50x.html;
+    
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+
+    # ================== HEALTH CHECK ==================
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # ================== DENY DANGEROUS PATHS ==================
+    # Deny access to hidden files and directories
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Deny access to backup files
+    location ~ ~$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # ================== PERFORMANCE OPTIMIZATIONS ==================
+    # Enable keepalive connections
+    keepalive_timeout 65;
+    
+    # Increase buffer sizes for better performance
+    client_max_body_size 10m;
+    
+    # Disable unnecessary log entries
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+    
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+}
+
+# ================== HTTPS CONFIGURATION ==================
+# Uncomment and configure when using Let's Encrypt or other SSL certificate
+
+# server {
+#     listen 443 ssl http2;
+#     server_name yourdomain.com www.yourdomain.com;
+#
+#     # SSL certificates (Let's Encrypt)
+#     ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+#
+#     # SSL configuration
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+#     ssl_prefer_server_ciphers on;
+#     ssl_session_cache shared:SSL:10m;
+#     ssl_session_timeout 10m;
+#
+#     # HSTS (Strict-Transport-Security)
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#
+#     # ... rest of the configuration same as above ...
+# }
+#
+# # Redirect HTTP to HTTPS
+# server {
+#     listen 80;
+#     server_name yourdomain.com www.yourdomain.com;
+#     return 301 https://$server_name$request_uri;
+# }
+
+# ================== PRODUCTION NOTES ==================
+# 
+# 1. For HTTP only (development):
+#    - Use this configuration as-is
+#    - Access via: http://localhost
+#
+# 2. For HTTPS (production):
+#    - Install Certbot: sudo apt-get install certbot python3-certbot-nginx
+#    - Generate certificate: sudo certbot certonly --standalone -d yourdomain.com
+#    - Uncomment HTTPS section above
+#    - Update server_name with your domain
+#    - Reload: nginx -s reload
+#
+# 3. Rate limiting tuning:
+#    - API limit: 5 requests per minute (configurable)
+#    - General limit: 30 requests per second
+#    - Adjust based on your traffic
+#
+# 4. Security headers:
+#    - X-Frame-Options: Prevents clickjacking
+#    - CSP: Prevents inline script injection
+#    - X-Content-Type-Options: Prevents MIME sniffing
+#
+# 5. Performance:
+#    - Gzip compression: ~70% size reduction
+#    - Browser caching: 1 year for static assets
+#    - Keepalive: Persistent connections
+#    - Connection pooling: 32 connections to backend
+#
+# 6. Monitoring:
+#    - Check access logs: tail -f /var/log/nginx/access.log
+#    - Check error logs: tail -f /var/log/nginx/error.log
+#    - Monitor rate limiting: grep "limiting requests" /var/log/nginx/error.log

@@ -1,0 +1,57 @@
+# Node modules (recréés dans Docker)
+node_modules
+npm-debug.log
+npm-error.log
+yarn-error.log
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist
+build
+*.tgz
+*.zip
+
+# Tests
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Temporary
+tmp
+temp
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+
+# Documentation (optionnel si vous voulez les inclure)
+# README.md
+# DOCUMENTATION_INDEX.md
+
+# Fichiers de configuration locale
+.dockerignore
+.editorconfig
+
+# Cache
+.cache
