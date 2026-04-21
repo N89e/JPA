@@ -117,10 +117,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// ================== STATIC FILES (FRONTEND) ==================
-// Serve frontend files from public/ directory
-app.use(express.static(path.join(__dirname, '../public')));
-
 // ================== GENERAL API RATE LIMITER ==================
 app.use('/api', apiLimiter);
 
@@ -167,25 +163,19 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// ================== SPA FALLBACK & 404 HANDLER ==================
-// For SPA: Serve index.html for non-API routes
-// For API: Return 404 JSON
+// ================== 404 HANDLER ==================
 app.use((req, res) => {
-  if (req.path.startsWith('/api')) {
-    logger.warn('API route not found', {
-      method: req.method,
-      path: req.path,
-      requestId: req.id,
-    });
-    res.status(404).json({
-      error: 'API route non trouvée',
-      requestId: req.id,
-      timestamp: new Date().toISOString(),
-    });
-  } else {
-    // SPA fallback: serve index.html
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-  }
+  logger.warn('Route not found', {
+    method: req.method,
+    path: req.path,
+    requestId: req.id,
+  });
+
+  res.status(404).json({
+    error: 'Route non trouvée',
+    requestId: req.id,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ================== GLOBAL ERROR HANDLER ==================

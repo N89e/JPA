@@ -29,3 +29,6 @@ Thumbs.db
 
 # Frontend
 frontend/src/assets/images/uploads/
+
+# Backend
+backend/public/
