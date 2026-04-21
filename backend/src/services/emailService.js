@@ -1,36 +1,30 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import logger from "../utils/logger.js";
-import https from "https";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
-// Fonction pour télécharger une image et la convertir en Base64
-const getImageAsBase64 = async (imageUrl) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Charger les images en Base64 au démarrage
+const getImageBase64 = (filename) => {
   try {
-    return new Promise((resolve, reject) => {
-      https.get(imageUrl, (response) => {
-        let data = Buffer.alloc(0);
-        response.on("data", (chunk) => {
-          data = Buffer.concat([data, chunk]);
-        });
-        response.on("end", () => {
-          const base64 = data.toString("base64");
-          resolve(`data:image/png;base64,${base64}`);
-        });
-      }).on("error", reject);
-    });
+    const imagePath = path.join(__dirname, "..", "..", "images", filename);
+    const imageBuffer = fs.readFileSync(imagePath);
+    return `data:image/png;base64,${imageBuffer.toString("base64")}`;
   } catch (error) {
-    logger.warn("Erreur lors du téléchargement d'image", { imageUrl, error: error.message });
+    logger.warn("Erreur lors de la lecture d'image", { filename, error: error.message });
     return null;
   }
 };
 
-// URLs des images
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const LOGO_IMAGE_URL = `${FRONTEND_URL}/src/assets/images/Logo_Portfolio/Logo_Portfolio.png`;
-const SIGNATURE_IMAGE_URL = `${FRONTEND_URL}/src/assets/images/Logo_Signature_Nuno/Nuno_ESTEVES-SIGNATURE.png`;
-
+// Images en Base64 (chargées une seule fois au démarrage)
+const LOGO_BASE64 = getImageBase64("Logo_Portfolio.png");
+const SIGNATURE_BASE64 = getImageBase64("Nuno_ESTEVES-SIGNATURE.png");
 
 // Configuration du transporteur email
 const createTransporter = () => {
@@ -49,10 +43,6 @@ const createTransporter = () => {
 export const sendUserConfirmationEmail = async (userEmail, userName) => {
   try {
     const transporter = createTransporter();
-    
-    // Télécharger les images et les convertir en Base64
-    const logoBase64 = await getImageAsBase64(LOGO_IMAGE_URL);
-    const signatureBase64 = await getImageAsBase64(SIGNATURE_IMAGE_URL);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -86,9 +76,9 @@ export const sendUserConfirmationEmail = async (userEmail, userName) => {
 
           </div>
         </div>
-        ${logoBase64 ? `<div style="text-align: center; padding: 20px 0; border-top: 1px solid #ddd; margin-top: 30px;">
-          <img src="${logoBase64}" alt="Logo Portfolio" style="height: 80px; width: auto; margin-right: 20px;">
-          ${signatureBase64 ? `<img src="${signatureBase64}" alt="Nuno ESTEVES" style="height: 20px; width: auto;">` : ''}
+        ${LOGO_BASE64 ? `<div style="text-align: center; padding: 20px 0; border-top: 1px solid #ddd; margin-top: 30px;">
+          <img src="${LOGO_BASE64}" alt="Logo Portfolio" style="height: 80px; width: auto; margin-right: 20px;">
+          ${SIGNATURE_BASE64 ? `<img src="${SIGNATURE_BASE64}" alt="Nuno ESTEVES" style="height: 20px; width: auto;">` : ''}
         </div>` : ''}
       `,
     };
@@ -112,9 +102,6 @@ export const sendContactRequestToOwner = async (contactData) => {
   try {
     const transporter = createTransporter();
     const { name, email, subject, message } = contactData;
-    
-    // Télécharger les images et les convertir en Base64
-    const logoBase64 = await getImageAsBase64(LOGO_IMAGE_URL);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -123,8 +110,8 @@ export const sendContactRequestToOwner = async (contactData) => {
       html: `
         <link href="https://fonts.googleapis.com/css2?family=Pattaya&display=swap" rel="stylesheet">
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          ${logoBase64 ? `<div style="text-align: center; padding: 20px 0; background-color: #f9f9f9;">
-            <img src="${logoBase64}" alt="Logo Portfolio" style="height: 80px; width: auto; margin-bottom: 20px;">
+          ${LOGO_BASE64 ? `<div style="text-align: center; padding: 20px 0; background-color: #f9f9f9;">
+            <img src="${LOGO_BASE64}" alt="Logo Portfolio" style="height: 80px; width: auto; margin-bottom: 20px;">
           </div>` : ''}
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
             <h1 style="color: black; margin: 0;">Nouvelle Demande de Contact</h1>
@@ -173,8 +160,8 @@ export const sendContactRequestToOwner = async (contactData) => {
                 <strong>⚠️ Action requise:</strong> Merci de répondre rapidement à cette demande.
               </p>
             </div>
-            ${logoBase64 ? `<div style="text-align: center; padding: 20px 0; border-top: 1px solid #ddd; margin-top: 30px;">
-              <img src="${logoBase64}" alt="Logo Portfolio" style="height: 80px; width: auto;">
+            ${LOGO_BASE64 ? `<div style="text-align: center; padding: 20px 0; border-top: 1px solid #ddd; margin-top: 30px;">
+              <img src="${LOGO_BASE64}" alt="Logo Portfolio" style="height: 80px; width: auto;">
             </div>` : ''}
           </div>
         </div>
