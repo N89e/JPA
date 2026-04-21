@@ -5,8 +5,10 @@ import logger from "../utils/logger.js";
 dotenv.config();
 
 // Use environment variables for image URLs (for cloud portability)
-const LOGO_URL = process.env.EMAIL_LOGO_URL || "http://localhost:5000/images/Logo_Portfolio.png";
-const SIGNATURE_URL = process.env.EMAIL_SIGNATURE_URL || "http://localhost:5000/images/Nuno_ESTEVES-SIGNATURE.png";
+// In production, use the domain where frontend is hosted (OVH)
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const LOGO_URL = process.env.EMAIL_LOGO_URL || `${FRONTEND_URL}/src/assets/images/Logo_Portfolio/Logo_Portfolio.png`;
+const SIGNATURE_URL = process.env.EMAIL_SIGNATURE_URL || `${FRONTEND_URL}/src/assets/images/Logo_Signature_Nuno/Nuno_ESTEVES-SIGNATURE.png`;
 
 
 // Configuration du transporteur email
