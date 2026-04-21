@@ -22,6 +22,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';  // npm install uuid
 
+// Define __dirname and __filename for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Routes
 import contactRoutes from './routes/contact.js';
 import projectsRoutes from './routes/projects.js';
