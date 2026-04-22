@@ -135,19 +135,12 @@ export const validateContactData = (data) => {
     errors.push('Le nom ne peut pas contenir de caractères spéciaux');
   }
 
-  // Vérifier que le sujet ne contient pas de chiffres
-  if (containsNumbers(data.subject)) {
-    errors.push('Le sujet ne peut pas contenir de chiffres');
-  }
-
-  // Vérifier que le sujet ne contient que des caractères autorisés
-  if (!isValidNameOrSubject(data.subject)) {
-    errors.push('Le sujet ne peut contenir que des lettres, espaces, tirets et apostrophes');
-  }
-
-  // Vérifier que le sujet ne contient pas de caractères spéciaux
-  if (containsSpecialCharacters(data.subject)) {
-    errors.push('Le sujet ne peut pas contenir de caractères spéciaux');
+  // Vérifier que le sujet ne contient que des caractères autorisés (y compris chiffres)
+  // FIX #5: Autoriser les chiffres dans le sujet (ex: "Agile 2024", "Sprint 3")
+  // Regex: lettres (y compris accents), espaces, tirets, apostrophes, et chiffres
+  const subjectRegex = /^[\p{L}\p{N}\s\-']+$/u;
+  if (!subjectRegex.test(data.subject)) {
+    errors.push('Le sujet ne peut contenir que des lettres, espaces, tirets, apostrophes et chiffres');
   }
 
   if (errors.length > 0) {
