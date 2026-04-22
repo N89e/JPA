@@ -7,6 +7,8 @@ yarn.lock
 
 # Environment variables - JAMAIS commiter
 .env
+backend/.env
+backend/.env.*
 .env.local
 .env.*.local
 .env.production

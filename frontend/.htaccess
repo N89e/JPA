@@ -1,0 +1,24 @@
+# ============ HTTPS FORCÉ + HSTS ============
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+# ============ PROTECTION CLICKJACKING ============
+Header always set X-Frame-Options "SAMEORIGIN"
+
+# ============ MIME SNIFFING ============
+Header always set X-Content-Type-Options "nosniff"
+
+# ============ REFERRER POLICY ============
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# ============ CONTENT SECURITY POLICY ============
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://portfolio-backend-XXXX.onrender.com; frame-ancestors 'none'; form-action 'self';"
+
+# ============ PERMISSIONS POLICY (caméra/micro/géoloc) ============
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+# ============ XSS PROTECTION ============
+Header always set X-XSS-Protection "1; mode=block"
