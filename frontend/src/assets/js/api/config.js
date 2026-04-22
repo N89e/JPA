@@ -1,17 +1,23 @@
-// Configuration de l'API - Lecture du meta tag
+// Configuration de l'API
 
-// Récupérer l'URL de l'API depuis le meta tag
-const metaTag = document.querySelector('meta[name="api-url"]');
-const apiBaseUrl = metaTag?.content;
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-if (!apiBaseUrl) {
-  console.error('❌ Meta tag "api-url" non trouvé dans index.html');
+let apiBaseUrl;
+
+if (isLocalhost) {
+  apiBaseUrl = 'http://localhost:5000/api';
+} else {
+  const metaTag = document.querySelector('meta[name="api-url"]');
+  apiBaseUrl = metaTag?.content;
+
+  if (!apiBaseUrl) {
+    console.error('❌ Meta tag "api-url" non trouvé dans index.html');
+  }
 }
 
-export const API_BASE_URL = apiBaseUrl || '/api'; // Fallback sûr
+export const API_BASE_URL = apiBaseUrl || '/api';
 
-// DEBUG (développement)
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+if (isLocalhost) {
   console.log('🔌 API URL:', API_BASE_URL);
 }
 

@@ -16,6 +16,7 @@
   --transition: all 0.3s ease;
   --text-title-police: "Pattaya";
   --web-padding-top-section: 120px;
+  --tablet-padding-top-section: 120px;
   --mobile-padding-top-section: 80px;
 }
 
@@ -228,7 +229,8 @@ body {
   color: var(--text-dark);
 }
 
-.hero-title, .hero-sous-title {
+.hero-title,
+.hero-sous-title {
   text-align: start;
   color: var(--text-dark);
   font-size: 2rem;

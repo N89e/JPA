@@ -28,7 +28,7 @@
 
   /* Home Section */
   .home-section {
-    padding-top: var(--mobile-padding-top-section);
+    padding-top: var(--tablet-padding-top-section);
   }
 
   .portfolio-title {
@@ -54,7 +54,7 @@
 
   /* About Section */
   .about-section {
-    padding-top: var(--mobile-padding-top-section);
+    padding-top: var(--tablet-padding-top-section);
   }
 
   .about-content {
@@ -89,7 +89,7 @@
 
   /* Services Grid */
   .services-section {
-    padding-top: var(--mobile-padding-top-section);
+    padding-top: var(--tablet-padding-top-section);
   }
 
   .services-grid {
@@ -118,7 +118,7 @@
 
   /* Projects Carousel */
   .projects-section {
-    padding-top: var(--mobile-padding-top-section);
+    padding-top: var(--tablet-padding-top-section);
   }
 
   .projects-carousel {
@@ -199,7 +199,7 @@
 
   /* Contact Section */
   .contact-section {
-    padding-top: var(--mobile-padding-top-section);
+    padding-top: var(--tablet-padding-top-section);
   }
 
   .contact-form {
@@ -723,11 +723,6 @@
 
 /* Orientation Landscape */
 @media (orientation: landscape) and (max-height: 500px) {
-  .home-section {
-    min-height: auto;
-    padding: 80px 1rem 2rem;
-  }
-
   .hero-title {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
@@ -746,7 +741,7 @@
   }
 
   .section {
-    padding: 2rem 1rem;
+    padding: 6rem 1rem;
   }
 
   .section-title {

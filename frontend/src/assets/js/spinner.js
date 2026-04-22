@@ -3,6 +3,8 @@
  * Gère le spinner de chargement et l'animation d'ouverture
  */
 
+import { API_BASE_URL } from './api/config.js';
+
 export function initSpinner() {
   // Le spinner overlay est déjà dans le HTML
   // Ajouter la classe pour désactiver le scroll
@@ -54,8 +56,8 @@ function checkBackendAndResolve(resolve) {
 
 function testBackendConnection() {
   return new Promise((resolve) => {
-    // Essayer de se connecter au backend
-    fetch('/api/health', { 
+    // Essayer de se connecter au backend avec une route qui existe
+    fetch(`${API_BASE_URL}/projects`, { 
       method: 'GET',
       timeout: 2000 
     })
