@@ -30,4 +30,4 @@ Write-Host "📤 Transfert vers OVH..." -ForegroundColor Yellow
 # pscp.exe -r portfolio.zip "$($REMOTE_USER)@$($REMOTE_HOST):$REMOTE_PATH/"
 
 Write-Host "✅ Déploiement réussi!" -ForegroundColor Green
-Write-Host "📍 Votre portfolio est accessible sur: https://votre_domaine.com" -ForegroundColor Cyan
+Write-Host "📍 Votre portfolio est accessible sur: https://nunoesteves.com" -ForegroundColor Cyan
