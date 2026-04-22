@@ -100,8 +100,6 @@ class ScrollAboutLogoController {
     this.isInitialized = false;
     this.positionDetector = null;
     this.scrollAnimator = null;
-
-    console.log("✅ ScrollAboutLogo destroyed");
   }
 }
 

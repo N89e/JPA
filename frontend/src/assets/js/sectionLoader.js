@@ -1,6 +1,7 @@
 // Lazy Loading des sections - Chargement à la demande basé sur le scroll
 import { loadServices } from "./services/servicesLoader.js";
 import { loadProjects } from "./services/projectsLoader.js";
+import { getSectionConfig } from "../../config/sectionsConfig.js";
 
 class SectionLoader {
   constructor() {
@@ -41,19 +42,17 @@ class SectionLoader {
 
   async loadSection(sectionId) {
     try {
-      // Mapper les IDs aux fichiers HTML
-      const sectionMap = {
-        'home': 'src/pages/home/home.html',
-        'about': 'src/pages/aboutMe/aboutMe.html',
-        'services': 'src/pages/myServices/myServices.html',
-        'projects': 'src/pages/myProjects/myProjects.html',
-        'contact': 'src/pages/contact/contact.html',
-        'footer': 'src/pages/footer/footer.html'
-      };
+      // Vérifier si la section est activée via la config
+      const sectionConfig = getSectionConfig(sectionId);
+      
+      if (!sectionConfig || !sectionConfig.enabled) {
+        console.warn(`Section désactivée ou inexistante: ${sectionId}`);
+        return;
+      }
 
-      const sectionFile = sectionMap[sectionId];
+      const sectionFile = sectionConfig.file;
       if (!sectionFile) {
-        console.warn(`Section not found: ${sectionId}`);
+        console.warn(`Section file not found: ${sectionId}`);
         return;
       }
 
@@ -106,3 +105,6 @@ class SectionLoader {
 document.addEventListener('DOMContentLoaded', () => {
   window.sectionLoader = new SectionLoader();
 });
+
+// Exporter la classe pour utilisation externe si nécessaire
+export { SectionLoader };

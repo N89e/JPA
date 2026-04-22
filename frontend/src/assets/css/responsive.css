@@ -259,6 +259,7 @@
     position: relative;
     height: 60px;
     padding: 0 1rem;
+    gap: 40%;
   }
 
   .navbar-menu {
@@ -285,6 +286,8 @@
 
   .menu-icon {
     display: flex;
+    background: none;
+    border: none;
   }
 
   .menu-icon.active span:nth-child(1) {
@@ -318,7 +321,7 @@
   }
 
   .container {
-    padding: 0 1rem;
+    padding: 0 0;
   }
 
   .section-title {
@@ -349,8 +352,11 @@
     font-size: 0.9rem;
   }
 
-  .hero-description {
-    font-size: 0.9rem;
+  .hero-description, .about-text p, 
+  .services-section p, .projects-section p, 
+  .contact-section p {
+    font-size: 0.95rem;
+    max-width: 100%;
     line-height: 1.6;
   }
 
@@ -388,15 +394,10 @@
     margin: 1.5rem 0 0.75rem;
   }
 
-  .about-text p {
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-  }
-
   .about-container-logo {
     position: absolute;
     display: block;
-    gap: 2rem;
+    width: 100%;
   }
 
   .about-list-logo {
@@ -406,7 +407,6 @@
   .about-icon {
     display: flex;
     margin: 3rem 0;
-    justify-content: start;
     height: 60px;
     font-size: 2.2rem;
     opacity: 0;
@@ -440,10 +440,6 @@
     font-size: 1.1rem;
   }
 
-  .service-card p {
-    font-size: 0.9rem;
-  }
-
   .service-icon {
     font-size: 2.2rem;
     height: 70px;
@@ -456,7 +452,7 @@
   }
 
   .projects-carousel {
-    padding: 1rem;
+    padding: 0;
     min-height: auto;
   }
 
@@ -466,37 +462,28 @@
     align-items: start;
     z-index: 10;
     overflow: hidden;
+    padding: 3rem;
   }
 
   .project-item {
     border-radius: 10px;
   }
 
-  /* Hide left/right cards completely on mobile */
-  .carousel-left,
-  .carousel-right {
-    width: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none;
-    transform: none !important;
-  }
-
   .carousel-center {
     height: auto;
-    min-width: 280px;
+    min-width: 300px;
     display: flex;
     flex-direction: column;
-    width: 100% !important;
   }
 
   .carousel-center .project-image {
     height: 180px;
   }
 
-  /* Hide project details on left/right cards - always hidden in mobile */
-  .carousel-left .project-details,
-  .carousel-right .project-details {
-    display: none;
+  /* Hide left/right cards completely on mobile - hide parent and all children */
+  .carousel-left,
+  .carousel-right {
+    display: none !important;
   }
 
   /* Project Details - Accordion Animation on Mobile (center card only) */
@@ -527,7 +514,7 @@
   }
 
   .carousel-center .project-info p {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   .tech-tag {
@@ -566,7 +553,9 @@
     transform: scale(1.1);
   }
 
-  /* Contact Section */
+  /*====================
+   Contact Section
+   =====================*/
   .contact-section {
     padding-top: var(--mobile-padding-top-section);
   }
@@ -644,7 +633,7 @@
   }
 
   .footer p {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   .footer-info {
@@ -663,21 +652,12 @@
     font-size: 0.9rem;
   }
 
-  .hero-description {
-    font-size: 0.85rem;
-    max-width: 100%;
-  }
-
   .section-title {
     font-size: 1.5rem;
   }
 
   .section-title::after {
     width: 40px;
-  }
-
-  .about-text p {
-    font-size: 0.9rem;
   }
 
   .skill-card h4 {
@@ -690,10 +670,6 @@
 
   .service-card h3 {
     font-size: 1.1rem;
-  }
-
-  .service-card p {
-    font-size: 0.9rem;
   }
 
   /* Pagination Dots Ultra Mobile */

@@ -43,7 +43,7 @@ body {
 
 .lign-high {
   position: sticky;
-  top: 20%;
+  top: -10%;
   height: 1px;
   width: 100%;
 }
@@ -57,7 +57,7 @@ body {
 
 .lign-low {
   position: sticky;
-  top: 80%;
+  top: 110%;
   height: 1px;
   width: 100%;
 }
@@ -223,18 +223,26 @@ body {
   color: var(--text-dark);
 }
 .init-title {
-  text-align: center;
+  text-align: start;
   font-size: 1.5rem;
   color: var(--text-dark);
 }
 
-.hero-title {
-  text-align: center;
+.hero-title, .hero-sous-title {
+  text-align: start;
   color: var(--text-dark);
   font-size: 2rem;
   font-family: var(--text-title-police), sans-serif;
   font-style: normal;
   font-weight: bold;
+}
+
+.hero-title {
+  padding-left: 60px;
+}
+
+.hero-sous-title {
+  padding-left: 120px;
 }
 
 .hero-color {
@@ -431,7 +439,7 @@ body {
 .service-card p {
   color: var(--text-dark);
   margin-bottom: 1rem;
-  line-height: 1.6;
+  line-height: 1.8;
 }
 
 /* =====================
@@ -800,6 +808,11 @@ body {
   align-items: center;
   gap: 1rem;
   color: var(--text-dark);
+}
+
+.info-item a {
+  color: var(--text-dark);
+  text-decoration: none;
 }
 
 .info-item i {
