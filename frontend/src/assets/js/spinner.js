@@ -4,9 +4,7 @@
  */
 
 export function initSpinner() {
-  // Créer et afficher le spinner overlay
-  createSpinnerOverlay();
-  
+  // Le spinner overlay est déjà dans le HTML
   // Ajouter la classe pour désactiver le scroll
   document.body.classList.add('spinner-active');
 
@@ -24,21 +22,6 @@ export function initSpinner() {
       closeSpinner();
     }, remainingTime);
   });
-}
-
-function createSpinnerOverlay() {
-  const spinnerHTML = `
-    <div id="spinnerOverlay" class="spinner-overlay">
-      <div class="spinner-container">
-        <div class="spinner-logo">
-          <img src="/src/assets/images/Logo_Portfolio/Logo_Portfolio.png" alt="Loading..." />
-        </div>
-        <div class="spinner-text">CHARGEMENT</div>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('afterbegin', spinnerHTML);
 }
 
 function waitForPageReady() {

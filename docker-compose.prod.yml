@@ -24,7 +24,7 @@ services:
       - EMAIL_SERVICE=${EMAIL_SERVICE:-gmail}
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
-      - EMAIL_TO=${EMAIL_TO}
+      - OWNER_EMAIL=${OWNER_EMAIL}
       
       # API Configuration
       - API_TIMEOUT=30000

@@ -5,12 +5,26 @@ yarn-error.log
 package-lock.json
 yarn.lock
 
-# Environment variables
+# Environment variables - JAMAIS commiter
 .env
 .env.local
 .env.*.local
+.env.production
+.env.production.local
+.env.development.local
 
-# IDE
+# Let's Encrypt & SSL certificates
+certbot/
+*.pem
+*.key
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# IDE & Editor settings
 .vscode/
 .idea/
 *.swp
@@ -18,17 +32,37 @@ yarn.lock
 *~
 .DS_Store
 
-# Build outputs
+# Build & compilation outputs
 dist/
 build/
+frontend/dist/
 *.log
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 
-# Frontend
-frontend/src/assets/images/uploads/
+# Tests & Coverage
+coverage/
+.nyc_output/
 
-# Backend
-backend/public/
+# Uploads
+frontend/src/assets/images/uploads/
+backend/public/uploads/
+
+# Node modules cache
+.npm
+.node-gyp/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Documentation
+AUDIT_W3C_SEO_ACCESSIBILITY.md
+GITHUB_SECRETS.md
+GUIDE_AJOUTER_PROJETS.md
+OVH_COMMANDES_RAPIDES.md
+PRODUCTION.md
+XSS_SECURITY_TEST.md

@@ -1,4 +1,4 @@
-# Node modules (recréés dans Docker)
+# Node modules
 node_modules
 npm-debug.log
 npm-error.log
@@ -44,10 +44,6 @@ temp
 Dockerfile
 docker-compose.yml
 docker-compose.prod.yml
-
-# Documentation (optionnel si vous voulez les inclure)
-# README.md
-# DOCUMENTATION_INDEX.md
 
 # Fichiers de configuration locale
 .dockerignore

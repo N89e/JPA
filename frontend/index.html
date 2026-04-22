@@ -8,13 +8,16 @@
   <meta name="keywords" content="chef de projet IT, gestion de projets agile scrum, expert en industrie, pilotage de projets complexes, expert SAFe, France">
   <meta name="author" content="Nuno ESTEVES">
   
+  <!-- 🔌 API Configuration (flexible, peut être changée per serveur) -->
+  <meta name="api-url" content="/api">
+  
   <!-- Canonical URL pour SEO -->
   <link rel="canonical" href="https://www.nunoesteves.com/">
   
   <!-- Favicon -->
   <link rel="icon" href="/src/assets/images/Logo_Portfolio/Logo_Portfolio.png" type="image/png" sizes="16x16">
   
-  <title>Portfolio - Chef de Projet IT | Nuno ESTEVES</title>
+  <title>Portfolio - Chef de Projet | Nuno ESTEVES</title>
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="src/assets/css/style.css">
@@ -35,7 +38,7 @@
   
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Portfolio - Chef de Projet IT | Nuno ESTEVES">
+  <meta name="twitter:title" content="Portfolio - Chef de Projet | Nuno ESTEVES">
   <meta name="twitter:description" content="Chef de projet IT avec 6 ans d'expérience. Expertise Agile, SAFe, leadership.">
   <meta name="twitter:image" content="https://www.nunoesteves.com/src/assets/images/Logo_Portfolio/Logo_Portfolio.png">
   
@@ -45,7 +48,7 @@
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Nuno ESTEVES",
-    "jobTitle": "Chef de Projet IT",
+    "jobTitle": "Chef de Projet",
     "url": "https://www.nunoesteves.com",
     "sameAs": [
       "https://www.linkedin.com/in/nuno-esteves-b89792246/",
@@ -63,6 +66,16 @@
 </head>
 
 <body>
+  <!-- Spinner Loading Screen - DOIT ÊTRE EN PREMIER -->
+  <div id="spinnerOverlay" class="spinner-overlay">
+    <div class="spinner-container">
+      <div class="spinner-logo">
+        <img src="/src/assets/images/Logo_Portfolio/Logo_Portfolio.png" alt="Loading..." />
+      </div>
+      <div class="spinner-text">CHARGEMENT</div>
+    </div>
+  </div>
+  
   <!-- Skip Link pour accessibilité clavier -->
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
   
