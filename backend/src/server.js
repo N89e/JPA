@@ -38,7 +38,9 @@ app.use((req, res, next) => {
 app.use(requestLoggerMiddleware);
 
 // ================ CORS CONFIGURATION ================
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+// Récupérer les origines autorisées depuis les env vars
+// Par défaut: localhost pour dev, ou FRONTEND_URL/ALLOWED_ORIGINS pour production
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')
   .map(url => url.trim());
 

@@ -1,27 +1,18 @@
-// Configuration flexible de l'API
+// Configuration de l'API - Lecture du meta tag
 
-// Détecter l'environnement
-const isDevelopment = window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1';
+// Récupérer l'URL de l'API depuis le meta tag
+const metaTag = document.querySelector('meta[name="api-url"]');
+const apiBaseUrl = metaTag?.content;
 
-// Lire l'URL depuis le meta tag (default: /api)
-const metaUrl = document.querySelector('meta[name="api-url"]')?.content;
-
-let apiBaseUrl = metaUrl;
-
-// Si pas de meta tag, détecter automatiquement
 if (!apiBaseUrl) {
-  if (isDevelopment) {
-    apiBaseUrl = `http://${window.location.hostname}:5000/api`;
-  } else {
-    // En production: API sur le même domaine
-    apiBaseUrl = `${window.location.protocol}//${window.location.host}/api`;
-  }
+  console.error('❌ Meta tag "api-url" non trouvé dans index.html');
 }
 
-export const API_BASE_URL = apiBaseUrl;
+export const API_BASE_URL = apiBaseUrl || '/api'; // Fallback sûr
 
 // DEBUG (développement)
-if (isDevelopment) {
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   console.log('🔌 API URL:', API_BASE_URL);
 }
+
+
