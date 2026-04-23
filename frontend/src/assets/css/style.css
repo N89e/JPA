@@ -916,7 +916,7 @@ body {
 .loading {
   text-align: center;
   padding: 2rem;
-  color: var(--text-light);
+  color: var(--text-black);
 }
 
 @keyframes slideToLeft {

@@ -56,6 +56,12 @@ function checkBackendAndResolve(resolve) {
 
 function testBackendConnection() {
   return new Promise((resolve) => {
+    // Timeout maximal de 3 secondes avant de passer à l'étape suivante
+    const timeoutId = setTimeout(() => {
+      console.warn('Timeout: Le backend met trop de temps à répondre (> 3s), continuant...');
+      resolve();
+    }, 3000);
+
     // Essayer de se connecter au backend avec une route qui existe
     fetch(`${API_BASE_URL}/projects`, { 
       method: 'GET',
@@ -63,10 +69,12 @@ function testBackendConnection() {
     })
       .then(() => {
         // Backend accessible
+        clearTimeout(timeoutId);
         resolve();
       })
       .catch(() => {
         // Backend pas accessible, mais continuer quand même
+        clearTimeout(timeoutId);
         console.warn('Backend non accessible, continuant...');
         resolve();
       });

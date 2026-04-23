@@ -2,11 +2,14 @@ import { getServices } from "../api/endpoints.js";
 
 // Charger les services
 export async function loadServices() {
+  const container = document.getElementById("servicesContainer");
+  if (!container) return;
+
+  container.innerHTML =
+    '<p class="loading" role="status" aria-live="polite">Chargement des services en cours...</p>';
+
   try {
     const response = await getServices();
-    const container = document.getElementById("servicesContainer");
-
-    if (!container) return;
 
     if (response.success && response.data) {
       container.innerHTML = response.data
@@ -31,12 +34,12 @@ export async function loadServices() {
       `,
         )
         .join("");
+    } else {
+      container.innerHTML =
+        '<p class="loading">Aucun service disponible pour le moment.</p>';
     }
   } catch (error) {
-    const container = document.getElementById("servicesContainer");
-    if (container) {
-      container.innerHTML =
-        '<p class="loading">Erreur lors du chargement des services</p>';
-    }
+    container.innerHTML =
+      '<p class="loading">Erreur lors du chargement des services</p>';
   }
 }
