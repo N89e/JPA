@@ -5,7 +5,7 @@ const projects = [
     title: "Installation lavage secondaire",
     description:
       "Étude, conception et installation d’une ligne de lavage combinant logwasher et crible laveur dans la région narbonnaise, permettant de valoriser la quasi-totalité des stériles, de pérenniser le gisement et de réduire la consommation de carburant.",
-    image: "src/assets/images/Image_SC113/Image_Principal.jpg",
+    image: "src/assets/images/Image_SC113/Image_Principal.png",
     technologies: ["Méthode 3P", "Tekla"],
     link: "",
     date: "2024",
