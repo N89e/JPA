@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
 
 /**
  * Vérifier si une chaîne contient des chiffres
@@ -52,7 +52,7 @@ const DANGEROUS_PATTERNS = [
  * Vérifier si une chaîne contient des patterns malveillants
  */
 function containsDangerousPatterns(str) {
-  return DANGEROUS_PATTERNS.some(pattern => pattern.test(str));
+  return DANGEROUS_PATTERNS.some((pattern) => pattern.test(str));
 }
 
 /**
@@ -63,7 +63,7 @@ export const validateContactData = (data) => {
 
   // Vérifier que tous les champs existent
   if (!data.name || !data.email || !data.subject || !data.message) {
-    errors.push('Tous les champs sont requis');
+    errors.push("Tous les champs sont requis");
     return { valid: false, errors };
   }
 
@@ -86,53 +86,61 @@ export const validateContactData = (data) => {
   }
 
   if (data.message.length > maxMessageLength) {
-    errors.push(`Le message ne doit pas dépasser ${maxMessageLength} caractères`);
+    errors.push(
+      `Le message ne doit pas dépasser ${maxMessageLength} caractères`,
+    );
   }
 
   // Vérifier le format email (strict RFC 5322 format)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(data.email)) {
-    errors.push('Format d\'email invalide');
+    errors.push("Format d'email invalide");
   }
 
   // Vérifier qu'il n'y a pas de contenu vide après nettoyage
   if (!data.name.trim() || !data.message.trim()) {
-    errors.push('Le nom et le message ne peuvent pas être vides');
+    errors.push("Le nom et le message ne peuvent pas être vides");
   }
 
   // Vérifier l'absence de caractères de contrôle dangereux
   const dangerousCharRegex = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
-  if (dangerousCharRegex.test(data.name + data.email + data.subject + data.message)) {
-    errors.push('Caractères invalides détectés');
+  if (
+    dangerousCharRegex.test(
+      data.name + data.email + data.subject + data.message,
+    )
+  ) {
+    errors.push("Caractères invalides détectés");
   }
 
   // Vérifier les patterns malveillants (XSS, injections)
   if (containsDangerousPatterns(data.name)) {
-    errors.push('Le nom contient des patterns non autorisés');
+    errors.push("Le nom contient des patterns non autorisés");
   }
   if (containsDangerousPatterns(data.email)) {
-    errors.push('L\'email contient des patterns non autorisés');
+    errors.push("L'email contient des patterns non autorisés");
   }
   if (containsDangerousPatterns(data.subject)) {
-    errors.push('Le sujet contient des patterns non autorisés');
+    errors.push("Le sujet contient des patterns non autorisés");
   }
   if (containsDangerousPatterns(data.message)) {
-    errors.push('Le message contient des patterns non autorisés');
+    errors.push("Le message contient des patterns non autorisés");
   }
 
   // Vérifier que le nom ne contient pas de chiffres
   if (containsNumbers(data.name)) {
-    errors.push('Le nom ne peut pas contenir de chiffres');
+    errors.push("Le nom ne peut pas contenir de chiffres");
   }
 
   // Vérifier que le nom ne contient que des caractères autorisés
   if (!isValidNameOrSubject(data.name)) {
-    errors.push('Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes');
+    errors.push(
+      "Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes",
+    );
   }
 
   // Vérifier que le nom ne contient pas de caractères spéciaux
   if (containsSpecialCharacters(data.name)) {
-    errors.push('Le nom ne peut pas contenir de caractères spéciaux');
+    errors.push("Le nom ne peut pas contenir de caractères spéciaux");
   }
 
   // Vérifier que le sujet ne contient que des caractères autorisés (y compris chiffres)
@@ -140,7 +148,9 @@ export const validateContactData = (data) => {
   // Regex: lettres (y compris accents), espaces, tirets, apostrophes, et chiffres
   const subjectRegex = /^[\p{L}\p{N}\s\-']+$/u;
   if (!subjectRegex.test(data.subject)) {
-    errors.push('Le sujet ne peut contenir que des lettres, espaces, tirets, apostrophes et chiffres');
+    errors.push(
+      "Le sujet ne peut contenir que des lettres, espaces, tirets, apostrophes et chiffres",
+    );
   }
 
   if (errors.length > 0) {
@@ -165,7 +175,7 @@ export const sanitizeContactData = (data) => {
     name: escapeHtml(name),
     email: escapeHtml(email),
     subject: escapeHtml(subject),
-    message: escapeHtml(message)
+    message: escapeHtml(message),
   };
 
   return encoded;
@@ -176,13 +186,13 @@ export const sanitizeContactData = (data) => {
  */
 function escapeHtml(text) {
   const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   };
-  return text.replace(/[&<>"']/g, m => map[m]);
+  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
 /**
@@ -195,8 +205,13 @@ export const validateContactMiddleware = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: validation.errors[0],
-      errors: validation.errors
+      errors: validation.errors,
     });
+  }
+
+  // Si le champ honeypot est rempli = c'est un bot
+  if (req.body.website && req.body.website !== "") {
+    return res.status(400).json({ success: false });
   }
 
   // Sanitization

@@ -5,79 +5,113 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
-// Define __dirname and __filename for ES modules
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 // Routes
 import contactRoutes from './routes/contact.js';
 import projectsRoutes from './routes/projects.js';
 import servicesRoutes from './routes/services.js';
 
 // Middleware
-import { apiLimiter } from './middleware/rateLimiter.js';
+import { contactLimiter, apiLimiter } from './middleware/rateLimiter.js';
 import logger, { requestLoggerMiddleware } from './utils/logger.js';
 
-// Configuration
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-// Trust proxy for load balancers
+// ================== TRUST PROXY ==================
+// Obligatoire sur Render (load balancer devant le serveur)
 app.set('trust proxy', 1);
 
-// ================ REQUEST ID MIDDLEWARE ================
-// Add unique ID to every request for tracing
+// ================== REQUEST ID ==================
 app.use((req, res, next) => {
   req.id = uuidv4();
   res.setHeader('X-Request-ID', req.id);
   next();
 });
 
-// ================ REQUEST LOGGING ================
+// ================== REQUEST LOGGING ==================
 app.use(requestLoggerMiddleware);
 
-// ================ CORS CONFIGURATION ================
-// Récupérer les origines autorisées depuis les env vars
-// Par défaut: localhost pour dev, ou FRONTEND_URL/ALLOWED_ORIGINS pour production
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:3000')
+// ================== ORIGINES AUTORISÉES ==================
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ||
+  process.env.FRONTEND_URL ||
+  'http://localhost:3000'
+)
   .split(',')
   .map(url => url.trim());
 
+// ================== PROTECTION ANTI-ABUS DIRECTE ==================
+// Bloque les appels directs (curl, Postman, scripts) sur les routes sensibles
+// Les navigateurs envoient toujours un Origin — les outils directs non
+const blockDirectAccess = (req, res, next) => {
+  const origin = req.headers.origin;
+  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+
+  // En production : bloquer si pas d'origin ET user-agent suspect
+  if (IS_PROD) {
+    // Bloquer les outils d'automatisation connus
+    const blockedAgents = ['curl/', 'python-requests', 'wget/', 'go-http', 'java/', 'ruby'];
+    const isSuspectAgent = blockedAgents.some(agent => userAgent.includes(agent));
+
+    // Pas d'origin + agent suspect = appel direct malveillant
+    if (!origin && isSuspectAgent) {
+      logger.warn('Direct API access blocked', {
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        path: req.path,
+        requestId: req.id,
+      });
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    }
+
+    // Origin présent mais non autorisé = bloqué
+    if (origin && !allowedOrigins.includes(origin)) {
+      logger.warn('Unauthorized origin blocked', {
+        ip: req.ip,
+        origin,
+        requestId: req.id,
+      });
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    }
+  }
+
+  next();
+};
+
+// ================== CORS ==================
 app.use(cors({
   origin: (origin, callback) => {
+    // Autorise si pas d'origin (appels serveur-à-serveur légitimes, health checks)
+    // ou si l'origin est dans la liste blanche
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      logger.warn('CORS rejection', { origin, allowedOrigins });
+      logger.warn('CORS rejection', { origin });
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// ================ BODY PARSING ================
-app.use(bodyParser.json({ limit: process.env.MAX_REQUEST_SIZE || '10mb' }));
+// ================== BODY PARSING ==================
+app.use(bodyParser.json({ limit: process.env.MAX_REQUEST_SIZE || '1mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ================ SECURITY HEADERS ================
+// ================== SECURITY HEADERS ==================
 app.use((req, res, next) => {
-  // Prévenir le sniffing de types MIME
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  
-  // Protéger contre le clickjacking
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  
-  // Protéger contre XSS (maintenant moins utile avec CSP, mais garde compatibilité)
+  res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  
-  // Politique de référents stricte
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
-  // Content Security Policy pour prévenir XSS
-  // Ne permet que les ressources depuis le même origin
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
@@ -85,79 +119,63 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
     "img-src 'self' data: https:; " +
     "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; " +
-    "connect-src 'self' https://portfolio-api-uj5s.onrender.com; " +
+    "connect-src 'self'; " +  // Plus d'URL Render exposée ici
     "frame-ancestors 'none'; " +
     "base-uri 'self'; " +
     "form-action 'self';"
   );
-  
-  // HSTS (HTTP Strict-Transport-Security) si en production
-  if (process.env.NODE_ENV === 'production') {
+
+  if (IS_PROD) {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
-  
-  res.setHeader('X-Request-ID', req.id);
+
+  // Masquer la technologie utilisée
+  res.removeHeader('X-Powered-By');
+
   next();
 });
 
-// ================ GENERAL API RATE LIMITER ================
+// ================== RATE LIMITING GLOBAL ==================
 app.use('/api', apiLimiter);
 
-// ================ STATIC ASSETS (FOR EMAIL IMAGES) ================
-// Serve images for email templates - makes them cloud-portable
+// ================== STATIC ASSETS ==================
 const imagesPath = process.env.IMAGES_PATH || './frontend/src/assets/images';
-app.use('/images', express.static(imagesPath, {
-  maxAge: '1d',
-  etag: false,
-}));
+app.use('/images', express.static(imagesPath, { maxAge: '1d', etag: false }));
 
-// API Routes
-app.use('/api/contact', contactRoutes);
+// ================== API ROUTES ==================
+
+// Contact : rate limit + protection anti-abus directe
+app.use('/api/contact', blockDirectAccess, contactLimiter, contactRoutes);
+
+// Projets & Services : lecture publique, pas de protection stricte nécessaire
 app.use('/api/projects', projectsRoutes);
 app.use('/api/services', servicesRoutes);
 
-// Health check
+// ================== HEALTH CHECK ==================
 app.get('/api/health', (req, res) => {
-  try {
-    const health = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV,
-      services: {
-        api: 'up',
-      },
-      requestId: req.id,
-    };
-    
-    res.status(200).json(health);
-  } catch (error) {
-    logger.error('Health check failed', error);
-    res.status(503).json({
-      status: 'unhealthy',
-      error: 'Service unavailable',
-      requestId: req.id,
-      timestamp: new Date().toISOString(),
-    });
-  }
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    environment: process.env.NODE_ENV,
+  });
+  // Pas de requestId ni d'infos sensibles exposées en prod
 });
 
-// 404 Handler
+// ================== 404 HANDLER ==================
 app.use((req, res) => {
   logger.warn('Route not found', {
     method: req.method,
     path: req.path,
     requestId: req.id,
   });
-
   res.status(404).json({
     error: 'Route non trouvée',
     requestId: req.id,
-    timestamp: new Date().toISOString(),
   });
 });
 
-// Error Handler
+// ================== ERROR HANDLER ==================
 app.use((err, req, res, next) => {
   logger.error('Unhandled error', {
     error: err.message,
@@ -168,51 +186,38 @@ app.use((err, req, res, next) => {
   });
 
   const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production'
-    ? 'Une erreur interne est survenue'
-    : err.message;
+  const message = IS_PROD ? 'Une erreur interne est survenue' : err.message;
 
   res.status(statusCode).json({
     error: message,
     requestId: req.id,
-    timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+    ...(!IS_PROD && { stack: err.stack }),
   });
 });
 
-// Démarrage du serveur
+// ================== DÉMARRAGE ==================
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info('Backend server started', {
     port: PORT,
     environment: process.env.NODE_ENV,
-    frontendUrl: process.env.FRONTEND_URL,
-    corsOrigins: allowedOrigins,
+    allowedOrigins,
   });
 });
 
-// ================ GRACEFUL SHUTDOWN ================
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM signal received: closing HTTP server');
+// ================== GRACEFUL SHUTDOWN ==================
+const shutdown = (signal) => {
+  logger.info(`${signal} received: closing HTTP server`);
   server.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);
   });
-});
+};
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
-  });
-});
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
-// ================ UNHANDLED REJECTION ================
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', {
-    promise,
-    reason,
-  });
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Rejection', { reason });
 });
 
 export default app;
