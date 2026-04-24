@@ -133,6 +133,8 @@
   animation: splitOpenLeft 1s ease-out forwards;
   z-index: 9999;
   pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .spinner-overlay.open::after {
@@ -146,30 +148,20 @@
   animation: splitOpenRight 1s ease-out forwards;
   z-index: 9999;
   pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Animation de séparation vers la gauche */
 @keyframes splitOpenLeft {
-  0% {
-    left: 0;
-    width: 50%;
-  }
-  100% {
-    left: -50%;
-    width: 50%;
-  }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 
 /* Animation de séparation vers la droite */
 @keyframes splitOpenRight {
-  0% {
-    right: 0;
-    width: 50%;
-  }
-  100% {
-    right: -50%;
-    width: 50%;
-  }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(100%); }
 }
 
 /* Fade out du spinner et du texte */

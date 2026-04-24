@@ -529,6 +529,9 @@ body {
   color: var(--primary-color);
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
+  background-color: var(--light-bg);
+  border-radius: 4px;
+  font-weight: 500;
 }
 
 .project-date {
@@ -872,7 +875,12 @@ body {
 /* =====================
    FOOTER
    ===================== */
-.footer {
+footer.footer {
+  min-height: 50px;
+  contain: layout;
+}
+
+  .footer {
   background-color: var(--dark-bg);
   color: white;
   padding: 0.5rem var(--spacing-unit);
@@ -1028,6 +1036,7 @@ body {
   text-decoration: none;
   z-index: 100;
   border-radius: 0 0 4px 0;
+  font-weight: 600;
 }
 
 .skip-link:focus {
@@ -1174,7 +1183,7 @@ input:focus:not(:focus-visible) {
   display: block;
   margin-top: 0.25rem;
   font-size: 0.875rem;
-  color: #999;
+  color: #666;;
   font-weight: normal;
 }
 
