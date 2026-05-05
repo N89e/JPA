@@ -340,20 +340,39 @@
     font-size: 2.5rem;
   }
 
+  .hero-image {
+    scale: 0.8;
+  }
+
+  .home-content-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
   .init-title {
     font-size: 1.2rem;
   }
 
   .hero-title {
     font-size: 1.5rem;
+    padding-left: 10px;
+  }
+
+  .hero-sous-title {
+    font-size: 1.5rem;
+    padding-left: 30px;
   }
 
   .hero-subtitle {
     font-size: 0.9rem;
   }
 
-  .hero-description, .about-text p, 
-  .services-section p, .projects-section p, 
+  .hero-description,
+  .about-text p,
+  .services-section p,
+  .projects-section p,
   .contact-section p {
     font-size: 0.95rem;
     max-width: 100%;

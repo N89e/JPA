@@ -247,6 +247,20 @@ body {
   padding-left: 120px;
 }
 
+.hero-image{
+  width: 170px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.home-content-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5rem;
+}
+
 .hero-color {
   background: linear-gradient(
     135deg,
